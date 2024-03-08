@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zionix</title>
+  </head>
+  <body>
+    <h1>Enter the Details</h1>
+    <div>
+      <form action="" id="priceform">
+        <label for="">Part Number</label>
+        <input type="text" id="part_number" />
+        <label for="">Quantity</label>
+        <input type="number" id="quantity" />
+        <div>
+          <button type="submit">Get Prices</button>
+        </div>
+      </form>
+    </div>
+    <div id="price-box">
+      <div id="mouser"></div>
+      <div id="rutronic"></div>
+    </div>
+  </body>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    let priceForm = document.getElementById("priceform");
+
+    priceForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      let part_number = document.getElementById("part_number").value;
+      let quantity = document.getElementById("quantity").value;
+      console.log(part_number);
+      console.log(quantity);
+      axios
+        .post("http://localhost:3000/searchPart/", {
+          part_number: part_number,
+          quantity: quantity,
+        })
+        .then((response) => {
+          console.log(response.data);
+          const mouserPrice =
+            "Price using Mouser API: " + response.data.Mouser_Price;
+          const rutronicPrice =
+            "Price using Rutronic API: " + response.data.Rutronic_Price;
+          document.getElementById("mouser").innerText = mouserPrice;
+          document.getElementById("rutronic").textContent = ''
+          if(typeof response.data.Rutronic_Price == "string"){
+            document.getElementById("rutronic").textContent =  rutronicPrice
+          }else{
+              
+              let priceBreaksContainer = document.getElementById("rutronic");
+              let priceBreakDiv = document.createElement("div");
+              priceBreakDiv.textContent = response.data.Rutronic_Price.Message;
+    
+              
+              priceBreaksContainer.appendChild(priceBreakDiv);
+              
+              response.data.Rutronic_Price.Price_Breaks.forEach((priceBreak) => {
+                
+                let priceBreakDiv = document.createElement("div");
+                priceBreakDiv.textContent = `Quantity: ${priceBreak.quantity}, Price: ${priceBreak.price}`;
+    
+                
+                priceBreaksContainer.appendChild(priceBreakDiv);
+              });
+          }
+        });
+    });
+  </script>
+</html>

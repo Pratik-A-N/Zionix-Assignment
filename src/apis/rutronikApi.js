@@ -10,13 +10,14 @@ const getRutronikPartPrice = async (partNumber, quantity) => {
             mpn: partNumber
         };
         const response = await axios.get(rutronikApiUrl, {params: queryParams});
+        if(response.data == '') return 500;
         const currency = response.data.currency;
         const prices = response.data.pricebreaks;
         const packed_unit = response.data.pu
         if(quantity%packed_unit != 0){
             return {
                 "Message": `Enter Quantity accroding to the Price Breaks and in multiple of ${packed_unit}`,
-                "Price Breaks" : prices
+                "Price_Breaks" : prices
             }
         }
         let final_price = -1;
@@ -32,7 +33,7 @@ const getRutronikPartPrice = async (partNumber, quantity) => {
         return currency + " " + total_sum.toString();
     } catch (error) {
         console.error("Error: ", error);
-        throw error;
+        return 500
     }
 }
 

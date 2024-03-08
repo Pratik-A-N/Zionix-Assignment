@@ -14,12 +14,21 @@ const getMouserPartPrice = async (partNumber, quantity) => {
             apiKey: mouserApiKey
         };
         const response = await axios.post(mouserApiUrl, postData, {params: queryParams});
-        const prices = response.data.SearchResults.Parts[0].PriceBreaks;
         
-        const currency = prices[0].Currency;
+        
+        let prices = [];
+        response.data.SearchResults.Parts.forEach((ele)=>{
+            
+            if(ele.ManufacturerPartNumber == partNumber){
+                // console.log(ele.ManufacturerPartNumber);
+                prices.push(ele)
+            }
+        })
+        // console.log(prices);
+        const currency = prices[0].PriceBreaks[0].Currency;
         
         let final_price = 0;
-        prices.forEach(price => {
+        prices[0].PriceBreaks.forEach(price => {
             if(price.Quantity <= quantity){
                 final_price = parseFloat(price.Price.replace(/[^\d.]/g, ''));
             }
@@ -30,7 +39,7 @@ const getMouserPartPrice = async (partNumber, quantity) => {
         return currency + " " + total_sum.toString();
     } catch (error) {
         console.error("Error: ", error);
-        throw error;
+        return 500;
     }
 }
 
